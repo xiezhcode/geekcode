@@ -1,0 +1,16 @@
+FROM golang:1.18.7 AS builder
+
+ENV GOOS linux
+ENV GOARCH amd64
+ENV GOPROXY https://goproxy.cn,direct
+ENV CGO_ENABLED 0
+
+RUN mkdir -p /workspace/apps/
+WORKDIR /workspace/apps/
+COPY . /workspace/apps/
+RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o gohttpserver -a -installsuffix ./main.go
+
+FROM scratch
+COPY --from=builder /workspace/apps/gohttpserver .
+EXPOSE 8080
+CMD ["./gohttpserver"]
